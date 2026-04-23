@@ -24,7 +24,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     outputs:
-      script-file: ${{ steps.build.outputs.script-file }}
+      script-file: ${{ steps.build.outputs.script-file }} # This line makes the script-file output available to other steps or jobs in the workflow.
     steps:
       - name: Get code
         uses: actions/checkout@v4
