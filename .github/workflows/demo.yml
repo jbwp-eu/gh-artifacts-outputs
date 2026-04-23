@@ -8,7 +8,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
       - name: Install dependencies
         run: npm ci
       - name: Lint code
@@ -18,13 +23,23 @@ jobs:
   build:
     needs: test
     runs-on: ubuntu-latest
+    outputs:
+      script-file: ${{ steps.build.outputs.script-file }}
     steps:
       - name: Get code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
       - name: Install dependencies
         run: npm ci
       - name: Build website
         run: npm run build
+      - name: Publish JS filename
+        run: find dist -name "*.js" -execdir echo "script-file={}" >> $GITHUB_OUTPUT \;
+        id: build
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -41,7 +56,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: dist-files
+          path: dist
       - name: List files
-        run: ls
+        run: ls -la && ls -la dist
+      - name: Output file name
+        run: echo "Script file: ${{ needs.build.outputs.script-file }}"
       - name: Deploy
         run: echo "Deploying..."
